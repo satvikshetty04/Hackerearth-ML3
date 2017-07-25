@@ -21,3 +21,5 @@ train = pd.read_csv("C:\\Users\\satvi\\Documents\\Projects\\Hackerearth - ML 3\\
                     converters={'datetime':date_conv})
 
 
+train = pd.read_csv("train.csv")
+test = pd.read_csv("test.csv")
