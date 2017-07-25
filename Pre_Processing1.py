@@ -8,11 +8,18 @@ import numpy as np
 import pandas as pd
 import os
 
+
+# --------------------- Initializing variables
+
 start_time = datetime.datetime.now()
 print("Started at: " + start_time)
 
+
 # --------------------- Converters
 
+
+def date_conv(x):
+    return x
 
 # --------------------- Loading dataset
 
