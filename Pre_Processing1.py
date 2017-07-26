@@ -42,5 +42,5 @@ for i in range(0, train.shape[0]):
     if train.iloc[i]['offerid'].isin(unique_id):
         
 print([train[train['offerid']==i]['devid'].mode() for i in unique_id])
-#.iloc[0]['devid'])
+
         
