@@ -17,16 +17,8 @@ print("Started at: " + str(start_time))
 
 # --------------------- Loading datasets
 
-# SS
-train = pd.read_csv("C:\\Users\\satvi\\Documents\\Projects\\Hackerearth - ML 3\\train.csv",
-                    header=0)
-
-test = pd.read_csv("C:\\Users\\satvi\\Documents\\Projects\\Hackerearth - ML 3\\test.csv",
-                    header=0)
-
-# GJ
-# train = pd.read_csv("train.csv")
-# test = pd.read_csv("test.csv")
+train = pd.read_csv("Data\\train.csv", header=0)
+test = pd.read_csv("Data\\test.csv", header=0)
 
 
 # --------------------- Creating features from datetime
@@ -107,7 +99,7 @@ del train_temp
 
 test_temp = test[test['devid'].isnull()].copy()
 test_temp['devid'] = test_temp['offerid'].map(lambda x: dictionary_test[str(x)]
-                if dictionary_test._contains_(str(x)) else dictionary_train[str(x)])
+                if dictionary_test.__contains__(str(x)) else dictionary_train[str(x)])
 test[test['devid'].isnull()] = test_temp
 del test_temp
 
@@ -155,6 +147,7 @@ test['browserid'] = np.where(test['browserid']=='Mozilla Firefox',
 
 
 # --------------------- Label Encoding
+
 encode_cols = ['countrycode', 'browserid', 'devid']
 for col in encode_cols:
     le = LabelEncoder()
@@ -164,15 +157,16 @@ for col in encode_cols:
 
 
 # --------------------- Reordering columns
+
 cols = train.columns.tolist()
-print(cols)
 cols.insert(len(cols), cols.pop(cols.index('click')))
 train = train.reindex(columns=cols)
 
 
 # --------------------- Saving files
-train.to_csv("train_pp1.csv", index = False)
-test.to_csv("test_pp1.csv", index = False)
+
+train.to_csv("Data\\train_pp1.csv", index = False)
+test.to_csv("Data\\test_pp1.csv", index = False)
 
 
 print("Overall time taken: " + str(datetime.datetime.now() - start_time))
