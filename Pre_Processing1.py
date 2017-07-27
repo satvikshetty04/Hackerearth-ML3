@@ -173,3 +173,6 @@ train = train.reindex(columns=cols)
 # --------------------- Saving files
 train.to_csv("train_pp1.csv", index = False)
 test.to_csv("test_pp1.csv", index = False)
+
+
+print("Overall time taken: " + str(datetime.datetime.now() - start_time))
