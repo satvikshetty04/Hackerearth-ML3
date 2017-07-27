@@ -45,7 +45,7 @@ test['minute'] = pd.to_datetime(test['datetime']).dt.minute
 
 # Checking initial number of null values
 train.isnull().sum(axis=0)/train.shape[0]
-
+test.isnull().sum(axis=0)/test.shape[0]
 
 train['devid'] = np.where(train['devid'].isnull()
                         &(~train['browserid'].isnull())
@@ -81,20 +81,39 @@ test['devid'] = np.where(test['devid'].isnull()
 unique_offerid_train = list(set(train[train['devid'].isnull() & train['browserid'].isnull()]['offerid']))
 unique_offerid_train = sorted(unique_offerid_train)
 
+unique_offerid_test = list(set(test[test['devid'].isnull() & test['browserid'].isnull()]['offerid']))
+unique_offerid_test = sorted(unique_offerid_test)
+
+# Creating dictionaries for Offer IDs vs Device IDs
+dictionary_train = {}
+for i in unique_offerid_train:
+    if len(train[train['offerid']==i]['devid'].mode()) == 0:
+        dictionary_train[str(i)] = 'Mobile'
+    else:
+        dictionary_train[str(i)] = train[train['offerid']==i]['devid'].mode()[0]
+
+dictionary_test = {}
+for i in list(set(unique_offerid_test).difference(unique_offerid_train)):
+    if len(train[train['offerid']==i]['devid'].mode()) == 0:
+        dictionary_test[str(i)] = 'Mobile'
+    else:
+        dictionary_test[str(i)] = train[train['offerid']==i]['devid'].mode()[0]
+
+# Setting Device ID when device & browser are null
+train_temp = train[train['devid'].isnull()].copy()
+train_temp['devid'] = train_temp['offerid'].map(lambda x: dictionary_train[str(x)])
+train[train['devid'].isnull()] = train_temp
+del train_temp
+
+test_temp = test[test['devid'].isnull()].copy()
+test_temp['devid'] = test_temp['offerid'].map(lambda x: dictionary_test[str(x)]
+                if dictionary_test._contains_(str(x)) else dictionary_train[str(x)])
+test[test['devid'].isnull()] = test_temp
+del test_temp
+
 # Checking number of null values now
 train.isnull().sum(axis=0)/train.shape[0]
-
-print("Time taken: " + str(datetime.datetime.now() - start_time))
-
-dictionary = {}
-for i in unique_offerid:
-    if len(train[train['offerid']==i]['devid'].mode()) == 0:
-        dictionary[str(i)] = 'Mobile'
-    else:
-        dictionary[str(i)] = train[train['offerid']==i]['devid'].mode()[0]
-
-train['devid'] = np.where(train['devid'].isnull() & train['browserid'].isnull(),
-                        dictionary[str(train['offerid'])], train['devid'] )
+test.isnull().sum(axis=0)/test.shape[0]
 
 print("Time taken: " + str(datetime.datetime.now() - start_time))
 
@@ -112,9 +131,27 @@ train['browserid'] = np.where(train['browserid'].isnull()
 train['browserid'] = np.where(train['browserid'].isnull()
                         &(train['devid']=='Tablet'),
                         'Internet Explorer', train['browserid'] )
-#Mozilla <---- Mozilla Firefox
+
+# Mozilla <---- Mozilla Firefox
 train['browserid'] = np.where(train['browserid']=='Mozilla Firefox',
                         'Mozilla', train['browserid'] )
+
+
+test['browserid'] = np.where(test['browserid'].isnull()
+                        &(test['devid']=='Mobile'),
+                        'Firefox', test['browserid'] )
+
+test['browserid'] = np.where(test['browserid'].isnull()
+                        &(test['devid']=='Desktop'),
+                        'Mozilla', test['browserid'] )
+
+test['browserid'] = np.where(test['browserid'].isnull()
+                        &(test['devid']=='Tablet'),
+                        'Internet Explorer', test['browserid'] )
+
+# Mozilla <---- Mozilla Firefox
+test['browserid'] = np.where(test['browserid']=='Mozilla Firefox',
+                        'Mozilla', test['browserid'] )
 
 
 # --------------------- Label Encoding
