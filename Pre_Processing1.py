@@ -122,7 +122,7 @@ train['browserid'] = np.where(train['browserid'].isnull()
 
 train['browserid'] = np.where(train['browserid'].isnull()
                         &(train['devid']=='Tablet'),
-                        'Internet Explorer', train['browserid'] )
+                        'Edge', train['browserid'] )
 
 # Mozilla <---- Mozilla Firefox
 train['browserid'] = np.where(train['browserid']=='Mozilla Firefox',
@@ -139,7 +139,7 @@ test['browserid'] = np.where(test['browserid'].isnull()
 
 test['browserid'] = np.where(test['browserid'].isnull()
                         &(test['devid']=='Tablet'),
-                        'Internet Explorer', test['browserid'] )
+                        'Edge', test['browserid'] )
 
 # Mozilla <---- Mozilla Firefox
 test['browserid'] = np.where(test['browserid']=='Mozilla Firefox',
