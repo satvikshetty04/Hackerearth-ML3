@@ -15,6 +15,8 @@ import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 from catboost import CatBoostClassifier
 from sklearn.model_selection import train_test_split
+from xgboost.sklearn import XGBClassifier
+
 # --------------------- Initializing variables
 
 start_time = datetime.datetime.now()
@@ -23,7 +25,7 @@ print("Started at: " + str(start_time))
 
 # --------------------- Loading datasets
 
-train_real = pd.read_csv("Data\\train_br_dev_pp3.csv", header=0)
+train_real = pd.read_csv("Data\\train_pp2.csv", header=0)
 
 train = train_real.copy()
 
@@ -43,7 +45,7 @@ train.drop(['ID','datetime'], axis = 1, inplace = True)
 # --------------------- Generating top 1000 frequent siteids
 siteidcounts = pd.DataFrame(train.groupby('siteid').size().rename('counts'))
 sortSiteid = siteidcounts.sort_values('counts', ascending = False)
-listTopSiteids = sortSiteid.index[0:999].astype(int).tolist()
+listTopSiteids = sortSiteid.index[0:299].astype(int).tolist()
 
 trainTopSiteid = train[~train['siteid'].isnull()&train['siteid'].isin(listTopSiteids)].copy()
 testTopSiteid = train[train['siteid'].isnull()].copy()
@@ -66,10 +68,10 @@ for col in encode_cols:
     trainTopSiteid[col] = le.transform(list(trainTopSiteid[col]))
     testTopSiteid[col] = le.transform(list(testTopSiteid[col]))
 
-siteidcol = 'siteid'
-le1 = LabelEncoder()
-le1.fit(list(trainTopSiteid[siteidcol].values))
-trainTopSiteid[siteidcol] = le1.transform(list(trainTopSiteid[siteidcol]))
+# siteidcol = 'siteid'
+# le1 = LabelEncoder()
+# le1.fit(list(trainTopSiteid[siteidcol].values))
+# trainTopSiteid[siteidcol] = le1.transform(list(trainTopSiteid[siteidcol]))
 
 
 
@@ -92,34 +94,39 @@ trainX = trainTopSiteid
 trainY = trainTopSiteid['siteid']
 trainX.drop(['siteid'], axis = 1, inplace = True)
 
-X_train, X_test, y_train, y_test = train_test_split(trainX, trainY, test_size = 0.4)
-model_train_siteid = CatBoostClassifier(depth=15, iterations=5, learning_rate=0.1, eval_metric='AUC',
- classes_count = 999, random_seed=1, calc_feature_importance=True, verbose=True)
-del sampled_train
+X_train, X_test, y_train, y_test = train_test_split(trainX, trainY, test_size = 0.5)
+# model_train_siteid = CatBoostClassifier(depth=15, iterations=5, learning_rate=0.1, eval_metric='AUC',
+#  classes_count = 999, random_seed=1, calc_feature_importance=True, verbose=True)
+# del sampled_train
 del train
 del trainTopSiteid
-del rows
+# del rows
 del trainX
 del trainY
 del listTopSiteids
+#
+# cat_cols = [0,1,2,3,4,5,6,9,10]
+#
+# model_train_siteid.fit(X_train
+#           ,y_train
+#           ,cat_features=cat_cols
+#           ,eval_set = (X_test, y_test)
+#           ,use_best_model = True
+#          )
 
-cat_cols = [0,1,2,3,4,5,6,9,10]
+model_train_siteid = XGBClassifier(n_estimators=10, nthread=-1, silent=False, seed=125, learning_rate=0.2)
+model_train_siteid.fit(X_train,y_train)
+model_train_siteid.score(X_test,y_test)
 
-model_train_siteid.fit(X_train
-          ,y_train
-          ,cat_features=cat_cols
-          ,eval_set = (X_test, y_test)
-          ,use_best_model = True
-         )
 
 #Remove siteid from testTopSiteid
-testTopSiteid.drop(['siteid'], axis = 1, inplace = True)
+# testTopSiteid.drop(['siteid'], axis = 1, inplace = True)
 pred = model_train_siteid.predict(testTopSiteid)
-predSiteid = le1.inverse_transform(pred.astype('int'))
-train_real[train_real['siteid'].isnull()]['siteid'] = predSiteid
+# predSiteid = le1.inverse_transform(pred.astype('int'))
+testTopSiteid = train_real[train_real['siteid'].isnull()].copy()
+testTopSiteid['siteid'] = pred
+train_real[train_real['siteid'].isnull()] = testTopSiteid
 train_real.to_csv('data\\train_br_dev_site_pp4.csv',index=False)
-
-
 
 
 
