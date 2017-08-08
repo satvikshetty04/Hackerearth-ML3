@@ -42,6 +42,7 @@ train['browserid'] = np.where(train['browserid']=='Mozilla Firefox',
 # --------------------- Dropping ID, DateTime
 train.drop(['ID','datetime'], axis = 1, inplace = True)
 
+
 # --------------------- Generating top 1000 frequent siteids
 siteidcounts = pd.DataFrame(train.groupby('siteid').size().rename('counts'))
 sortSiteid = siteidcounts.sort_values('counts', ascending = False)
@@ -52,13 +53,6 @@ testTopSiteid = train[train['siteid'].isnull()].copy()
 
 trainTopSiteid.isnull().sum(axis=0)/trainTopSiteid.shape[0]
 
-# --------------------- this code is from ML3 website.
-#cols = ['siteid','offerid','category','merchant']
-#for x in cols:
-#    trainTopSiteid[x] = trainTopSiteid[x].astype('object')
-#    testTopSiteid[x] = testTopSiteid[x].astype('object')
-
-
 # --------------------- Label Encoding
 
 encode_cols = ['countrycode', 'browserid', 'devid']
@@ -67,13 +61,6 @@ for col in encode_cols:
     le.fit(list(trainTopSiteid[col].values) + list(testTopSiteid[col].values))
     trainTopSiteid[col] = le.transform(list(trainTopSiteid[col]))
     testTopSiteid[col] = le.transform(list(testTopSiteid[col]))
-
-# siteidcol = 'siteid'
-# le1 = LabelEncoder()
-# le1.fit(list(trainTopSiteid[siteidcol].values))
-# trainTopSiteid[siteidcol] = le1.transform(list(trainTopSiteid[siteidcol]))
-
-
 
 # --------------------- Reordering columns
 
@@ -84,45 +71,25 @@ testTopSiteid = testTopSiteid.reindex(columns=cols)
 
 # --------------------- Saving files
 
-# trainTopSiteid.to_csv("Data\\train_pp_siteid_top1000.csv", index = False)
-
 np.random.seed(1000)
-#rows = np.random.choice(trainTopSiteid.index.values, 1000000)
-#sampled_train = trainTopSiteid.loc[rows]
 
 trainX = trainTopSiteid
 trainY = trainTopSiteid['siteid']
 trainX.drop(['siteid'], axis = 1, inplace = True)
 
 X_train, X_test, y_train, y_test = train_test_split(trainX, trainY, test_size = 0.5)
-# model_train_siteid = CatBoostClassifier(depth=15, iterations=5, learning_rate=0.1, eval_metric='AUC',
-#  classes_count = 999, random_seed=1, calc_feature_importance=True, verbose=True)
-# del sampled_train
 del train
 del trainTopSiteid
-# del rows
 del trainX
 del trainY
 del listTopSiteids
-#
-# cat_cols = [0,1,2,3,4,5,6,9,10]
-#
-# model_train_siteid.fit(X_train
-#           ,y_train
-#           ,cat_features=cat_cols
-#           ,eval_set = (X_test, y_test)
-#           ,use_best_model = True
-#          )
 
 model_train_siteid = XGBClassifier(n_estimators=10, nthread=-1, silent=False, seed=125, learning_rate=0.2)
 model_train_siteid.fit(X_train,y_train)
 model_train_siteid.score(X_test,y_test)
 
 
-#Remove siteid from testTopSiteid
-# testTopSiteid.drop(['siteid'], axis = 1, inplace = True)
 pred = model_train_siteid.predict(testTopSiteid)
-# predSiteid = le1.inverse_transform(pred.astype('int'))
 testTopSiteid = train_real[train_real['siteid'].isnull()].copy()
 testTopSiteid['siteid'] = pred
 train_real[train_real['siteid'].isnull()] = testTopSiteid
