@@ -21,12 +21,12 @@ In this challenge, you have to predict the probability whether an ad will get cl
     - Parameter_Tuning.py : Used GridSearch to get best parameters for XGBoost
 
 
-Files not used:
-	- Pre_Processing1.py : Failed to correctly predict missing values, was not used
-    - SiteID_Pred.py, Pre_Processing_siteid_top100.py : Performed poorly owing to number of categories.
-    - Model_XGBoost.py : Version discarded after paramter tuning and changing files
-    - Model_Keras_NN.py : Did not get time to work on it
-    - Ensembling: Tried a simple averaging model as well as a combined model of XGBoost and CatBoost. Neither gave great results.
+**Files not used:**
+- Pre_Processing1.py : Failed to correctly predict missing values
+- SiteID_Pred.py, Pre_Processing_siteid_top100.py : Performed poorly owing to number of categories.
+- Model_XGBoost.py : Version discarded after paramter tuning and changing files
+- Model_Keras_NN.py : Did not get time to work on it
+- Ensembling: Tried a simple averaging model as well as a combined model of XGBoost and CatBoost. Neither gave great results.
 
 
 **Overall Rank:** 9
